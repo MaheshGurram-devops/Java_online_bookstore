@@ -12,8 +12,7 @@ pipeline {
                     branches: [[name: '*/umamahesh-V1']],
                     userRemoteConfigs: [[
                         url: 'https://github.com/umamaheshmgangadhar-byte/Java_online_bookstore.git',
-                        credentialsId: 'Github-credentials-Uma
-'
+                        credentialsId: 'Github-credentials-Uma'
                     ]]
                 ])
             }
