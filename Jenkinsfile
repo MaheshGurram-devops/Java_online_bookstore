@@ -20,11 +20,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Build the project'
-                sh '''
-                    echo "Workspace: $(pwd)"
-                    ls -la
-                    test -f pom.xml || { echo 'pom.xml not found'; exit 1; }
-                    echo "JAVA_HOME=${JAVA_HOME:-}"
+                powershell '''
+                    Write-Host "Workspace: $PWD"
+                    Get-ChildItem
+                    if (-not (Test-Path "pom.xml")) { Write-Error "pom.xml not found"; exit 1 }
+                    Write-Host "JAVA_HOME=$env:JAVA_HOME"
                     java -version
                     mvn -version
                     mvn -B clean package
