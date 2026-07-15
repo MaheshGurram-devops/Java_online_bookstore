@@ -6,16 +6,16 @@ pipeline {
     stages {
         stage('Sourcecode checkout') {
             steps {
-                echo 'Clone Java Online Bookstore repository'
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                    sh '''
-                        rm -rf workspace-copy
-                        git clone https://$GIT_USER:$GIT_PASS@github.com/umamaheshmgangadhar-byte/Java_online_bookstore.git workspace-copy
-                        cd workspace-copy
-                        pwd
-                        ls -la
-                    '''
-                }
+                echo 'Checkout repository using Jenkins Git credentials'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/umamahesh-V1']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/umamaheshmgangadhar-byte/Java_online_bookstore.git',
+                        credentialsId: 'Github-credentials-Uma
+'
+                    ]]
+                ])
             }
         }
         stage('Build') {
@@ -24,7 +24,6 @@ pipeline {
                 sh '''
                     echo "Workspace: $(pwd)"
                     ls -la
-                    cd workspace-copy
                     test -f pom.xml || { echo 'pom.xml not found'; exit 1; }
                     echo "JAVA_HOME=${JAVA_HOME:-}"
                     java -version
