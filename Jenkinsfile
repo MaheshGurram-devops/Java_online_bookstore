@@ -35,7 +35,7 @@ pipeline {
     post {
         always {
             echo 'Archieving build artifacts'
-            archiveArtifacts artifacts: '**/target/*.war', fingerprint: true, allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/target/*.war, **/target/*executable.jar', fingerprint: true, allowEmptyArchive: true
         }
         success {
             echo 'Build completed successfully'
