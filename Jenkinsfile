@@ -39,6 +39,10 @@ pipeline {
                     # Add your deployment commands here
                     copy /Y target\\onlinebookstore.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 11.0\\webapps"
 			Dir "C:\\Program Files\\Apache Software Foundation\\Tomcat 11.0\\webapps\\"
+			timeout /t 30
+			Dir "C:\\Program Files\\Apache Software Foundation\\Tomcat 11.0\\webapps\\"
+			timeout /t 60
+			Dir "C:\\Program Files\\Apache Software Foundation\\Tomcat 11.0\\webapps\\"
                 '''
             }
         }
