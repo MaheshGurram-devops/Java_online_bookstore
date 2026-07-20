@@ -27,7 +27,7 @@ pipeline {
                     Write-Host "JAVA_HOME=$env:JAVA_HOME"
                     java -version
                     mvn -version
-                    mvn -B clean package
+                    mvn clean package
                 '''
             }
         }
