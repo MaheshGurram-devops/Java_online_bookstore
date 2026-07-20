@@ -11,8 +11,10 @@ phases:
         - mvn clean package
         - mkdir output
         - cp target/*.war output/books.war
+        - cp target/*executable.jar output/onlinebookstore-executable.jar
 artifacts:
   files:
         - 'output/*.war'
+        - 'output/*.jar'
         - appspec.yaml
         - scripts/*
