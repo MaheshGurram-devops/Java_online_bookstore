@@ -27,7 +27,17 @@ pipeline {
                     Write-Host "JAVA_HOME=$env:JAVA_HOME"
                     java -version
                     mvn -version
-                    mvn clean package
+                    mvn -B clean package
+                '''
+            }
+        }
+        stage ('Deployment') {
+            steps {
+                echo 'Deploy the application'
+              bat '''
+                    echo "Deploying the application..."
+                    # Add your deployment commands here
+                    copy /Y target\\onlinebookstore.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 11.0\\webapps"
                 '''
             }
         }
@@ -35,7 +45,7 @@ pipeline {
     post {
         always {
             echo 'Archieving build artifacts'
-            archiveArtifacts artifacts: '**/target/*.war', fingerprint: true, allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/target/*.war, **/target/*executable.jar', fingerprint: true, allowEmptyArchive: true
         }
         success {
             echo 'Build completed successfully'
