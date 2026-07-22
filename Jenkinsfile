@@ -22,7 +22,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Build the project'
-                powershell '''
+                sh '''
                     Write-Host "Workspace: $PWD"
                     Get-ChildItem
                     if (-not (Test-Path "pom.xml")) { Write-Error "pom.xml not found"; exit 1 }
