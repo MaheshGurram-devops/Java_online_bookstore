@@ -1,6 +1,6 @@
 pipeline {
     agent {
-		label 'Linux_bookstore'
+		label 'Linux-bookstore'
 	}
     environment {
         MAVEN_OPTS = '-Xmx1024m'
