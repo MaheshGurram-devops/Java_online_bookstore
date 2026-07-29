@@ -34,11 +34,10 @@ pipeline {
                     env.WAR_FILE = '''onlinebookstore.war'''
                     echo "Artifact name set to: ${env.ARTIFACT_NAME}"
                     echo "WAR file set to: ${env.WAR_FILE}"
-                    
+
                 }
             }
         }
-        
         // Stage 3: Prepare WAR artifact for deployment
         stage('Prepare Artifact') {
             steps {
