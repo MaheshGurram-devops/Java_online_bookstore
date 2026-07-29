@@ -25,12 +25,12 @@ pipeline {
         stage('Build') {
             steps {
                 echo '========== Building project with Maven =========='
-                bat '''
+                powershell '''
                 mvn -B clean package
                 '''
                 script {
                     // Read artifact finalName from pom.xml so WAR name is always correct
-                    env.ARTIFACT_NAME = bat(
+                    env.ARTIFACT_NAME = powershell(
                         returnStdout: true,
                         script: '''
                             mvn -B -q -DforceStdout help:evaluate -Dexpression=project.build.finalName
@@ -45,16 +45,19 @@ pipeline {
         stage('Prepare Artifact') {
             steps {
                 echo '========== Preparing deployment artifacts =========='
-                bat '''
-                    if not exist output mkdir output
-                    if exist target\\%WAR_FILE% (
-                        copy target\\%WAR_FILE% output\\%WAR_FILE%
-                        echo Successfully prepared %WAR_FILE%
-                        dir output
-                    ) else (
-                        echo ERROR: WAR file not found at target\\%WAR_FILE%
-                        exit /b 1
-                    )
+                powershell '''
+                    $outputDir = "output"
+                    New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+
+                    $sourceWar = "target/$env:WAR_FILE"
+                    if (Test-Path $sourceWar) {
+                        Copy-Item $sourceWar -Destination "$outputDir/$env:WAR_FILE" -Force
+                        Write-Host "Successfully prepared $env:WAR_FILE"
+                        Get-ChildItem $outputDir
+                    } else {
+                        Write-Error "WAR file not found at $sourceWar"
+                        exit 1
+                    }
                 '''
             }
         }
@@ -63,34 +66,38 @@ pipeline {
         stage('Deploy to Tomcat') {
             steps {
                 echo '========== Deploying to Tomcat =========='
-                bat '''
-                    if not exist "%TOMCAT_HOME%\\bin" (
-                        echo ERROR: Tomcat not found at %TOMCAT_HOME%
-                        exit /b 1
-                    )
+                powershell '''
+                    if (-not (Test-Path "$env:TOMCAT_HOME/bin")) {
+                        Write-Error "Tomcat not found at $env:TOMCAT_HOME"
+                        exit 1
+                    }
 
-                    if exist "%TOMCAT_HOME%\\bin\\shutdown.bat" (
-                        call "%TOMCAT_HOME%\\bin\\shutdown.bat"
-                    ) else if exist "%TOMCAT_HOME%\\bin\\shutdown.sh" (
-                        call "%TOMCAT_HOME%\\bin\\shutdown.sh"
-                    )
+                    $tomcatBin = Join-Path $env:TOMCAT_HOME "bin"
+                    $shutdownScript = Join-Path $tomcatBin "shutdown.sh"
+                    $startupScript = Join-Path $tomcatBin "startup.sh"
 
-                    timeout /t 2 /nobreak >nul
+                    if (Test-Path $shutdownScript) {
+                        & $shutdownScript 2>$null
+                    } elseif (Test-Path (Join-Path $tomcatBin "shutdown.bat")) {
+                        & (Join-Path $tomcatBin "shutdown.bat") 2>$null
+                    }
 
-                    del /q "%TOMCAT_WEBAPPS%\\*.war" 2>nul
-                    if exist "%TOMCAT_WEBAPPS%\\%ARTIFACT_NAME%" rmdir /s /q "%TOMCAT_WEBAPPS%\\%ARTIFACT_NAME%"
+                    Start-Sleep -Seconds 2
 
-                    copy output\\%WAR_FILE% "%TOMCAT_WEBAPPS%\\"
-                    echo Deployed %WAR_FILE% to %TOMCAT_WEBAPPS%
+                    Get-ChildItem -Path $env:TOMCAT_WEBAPPS -Filter "*.war" | Remove-Item -Force -ErrorAction SilentlyContinue
+                    Remove-Item -Path (Join-Path $env:TOMCAT_WEBAPPS $env:ARTIFACT_NAME) -Recurse -Force -ErrorAction SilentlyContinue
 
-                    if exist "%TOMCAT_HOME%\\bin\\startup.bat" (
-                        call "%TOMCAT_HOME%\\bin\\startup.bat"
-                    ) else if exist "%TOMCAT_HOME%\\bin\\startup.sh" (
-                        call "%TOMCAT_HOME%\\bin\\startup.sh"
-                    )
+                    Copy-Item "output/$env:WAR_FILE" -Destination $env:TOMCAT_WEBAPPS -Force
+                    Write-Host "Deployed $env:WAR_FILE to $env:TOMCAT_WEBAPPS"
 
-                    timeout /t 3 /nobreak >nul
-                    echo Tomcat started successfully
+                    if (Test-Path $startupScript) {
+                        & $startupScript
+                    } elseif (Test-Path (Join-Path $tomcatBin "startup.bat")) {
+                        & (Join-Path $tomcatBin "startup.bat")
+                    }
+
+                    Start-Sleep -Seconds 3
+                    Write-Host "Tomcat started successfully"
                 '''
             }
         }
