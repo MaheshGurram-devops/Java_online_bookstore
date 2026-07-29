@@ -25,7 +25,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo '========== Building project with Maven =========='
-                pwsh '''
+                ppwershell '''
                 mvn -B clean package
                 '''
                 script {
@@ -40,7 +40,7 @@ pipeline {
         stage('Prepare Artifact') {
             steps {
                 echo '========== Preparing deployment artifacts =========='
-                sh '''
+                powershell '''
                     mkdir -p output
                     # Copy WAR file from Maven target directory (named according to pom.xml finalName)
                     if [ -f target/${WAR_FILE} ]; then
@@ -59,12 +59,12 @@ pipeline {
         stage('Deploy to Tomcat') {
             steps {
                 echo '========== Deploying to Tomcat =========='
-                sh '''
+                powershell '''
                     # Verify Tomcat installation
-                    if [ ! -d ${TOMCAT_HOME}/bin ]; then
-                        echo "ERROR: Tomcat not found at ${TOMCAT_HOME}"
+                    if ( !(Test-Path "${TOMCAT_HOME}/bin") ) {
+                        Write-Host "ERROR: Tomcat not found at ${TOMCAT_HOME}"
                         exit 1
-                    fi
+                    }
                     
                     # Check if sudo is available (for privilege escalation if needed)
                     if command -v sudo >/dev/null 2>&1; then
