@@ -25,7 +25,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo '========== Building project with Maven =========='
-                ppwershell '''
+                powershell '''
                 mvn -B clean package
                 '''
                 script {
