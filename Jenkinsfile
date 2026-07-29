@@ -30,13 +30,11 @@ pipeline {
                 '''
                 script {
                     // Read artifact finalName from pom.xml so WAR name is always correct
-                    env.ARTIFACT_NAME = powershell(
-                        returnStdout: true,
-                        script: '''
-                            mvn -B -q -DforceStdout help:evaluate -Dexpression=project.build.finalName
-                        '''
-                    ).trim()
-                    env.WAR_FILE = "${env.ARTIFACT_NAME}.war"
+                    env.ARTIFACT_NAME = '''onlinebookstore'''
+                    env.WAR_FILE = '''onlinebookstore.war'''
+                    echo "Artifact name set to: ${env.ARTIFACT_NAME}"
+                    echo "WAR file set to: ${env.WAR_FILE}"
+                    
                 }
             }
         }
