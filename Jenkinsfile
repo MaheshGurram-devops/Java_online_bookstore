@@ -25,7 +25,9 @@ pipeline {
         stage('Build') {
             steps {
                 echo '========== Building project with Maven =========='
-                sh 'mvn -B clean package'
+                pwsh '''
+                mvn -B clean package
+                '''
                 script {
                     // Read artifact finalName from pom.xml so WAR name is always correct
                     env.ARTIFACT_NAME = sh(script: 'mvn -B -q -DforceStdout help:evaluate -Dexpression=project.build.finalName', returnStdout: true).trim()
