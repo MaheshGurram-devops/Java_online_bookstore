@@ -2,7 +2,7 @@
 // This pipeline builds, packages, and deploys the Java bookstore application to Tomcat
 
 pipeline {
-    agent { label 'Built-In' }
+    agent any
     
     environment {
         // Set Maven heap memory limit for build optimization
