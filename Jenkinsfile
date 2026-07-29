@@ -70,8 +70,8 @@ pipeline {
                     }
 
                     $tomcatBin = Join-Path $env:TOMCAT_HOME "bin"
-                    $shutdownScript = Join-Path $tomcatBin "shutdown.sh"
-                    $startupScript = Join-Path $tomcatBin "startup.sh"
+                    $shutdownScript = Join-Path $tomcatBin "shutdown.bat"
+                    $startupScript = Join-Path $tomcatBin "startup.bat"
 
                     if (Test-Path $shutdownScript) {
                         & $shutdownScript 2>$null
